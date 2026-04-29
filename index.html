@@ -270,11 +270,128 @@ tbody tr:hover .row-acts { opacity:1; }
 @media(max-width:1200px){ .metrics-grid{grid-template-columns:repeat(2,1fr);} }
 @media(max-width:1024px){ .right-col{display:none;} }
 @media(max-width:768px){ .sidebar{display:none;} .feed{padding:12px;} .topnav{padding:0 10px;} .nav-center{display:none;} }
+
+/* ── Login Screen ── */
+.login-screen {
+  position:fixed; inset:0; z-index:9999;
+  background: linear-gradient(135deg, #1877F2 0%, #0C5AC8 50%, #083D8C 100%);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Inter',sans-serif;
+}
+.login-screen.hidden { display:none; }
+.login-box {
+  background:white; border-radius:16px;
+  padding:40px 36px 36px; width:100%; max-width:400px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.3);
+  animation: loginSlide 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes loginSlide { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+.login-logo { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:28px; }
+.login-logo-icon { width:52px; height:52px; border-radius:14px; background:var(--fb-blue); display:flex; align-items:center; justify-content:center; }
+.login-logo-icon svg { width:26px; height:26px; fill:none; stroke:white; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.login-logo-text { font-size:26px; font-weight:700; color:var(--fb-blue); letter-spacing:-0.04em; }
+.login-welcome { text-align:center; margin-bottom:28px; }
+.login-welcome h2 { font-size:20px; font-weight:700; color:#050505; letter-spacing:-0.02em; margin-bottom:4px; }
+.login-welcome p { font-size:14px; color:#65676B; }
+.login-field { margin-bottom:14px; }
+.login-field label { display:block; font-size:12px; font-weight:600; color:#65676B; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em; }
+.login-input {
+  width:100%; padding:12px 14px; font-size:15px;
+  border:1.5px solid #CED0D4; border-radius:10px;
+  font-family:'Inter',sans-serif; color:#050505;
+  outline:none; transition:all 0.18s; background:#F8F9FA;
+}
+.login-input:focus { border-color:var(--fb-blue); background:white; box-shadow:0 0 0 3px rgba(24,119,242,0.15); }
+.login-input.error { border-color:#FA3E3E; background:#FFF5F5; box-shadow:0 0 0 3px rgba(250,62,62,0.1); }
+.login-pw-wrap { position:relative; }
+.login-pw-wrap .login-input { padding-right:44px; }
+.pw-toggle { position:absolute; right:13px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#8A8D91; padding:4px; transition:color 0.15s; }
+.pw-toggle:hover { color:#1877F2; }
+.pw-toggle svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+.login-error {
+  background:#FEECEC; border:1px solid rgba(250,62,62,0.3);
+  border-radius:8px; padding:10px 14px;
+  font-size:13px; color:#C0392B; font-weight:500;
+  display:none; margin-bottom:14px; text-align:center;
+}
+.login-error.show { display:block; animation:shake 0.35s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+.login-btn {
+  width:100%; padding:13px; background:var(--fb-blue); color:white;
+  border:none; border-radius:10px; font-size:15px; font-weight:700;
+  font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.18s;
+  margin-top:4px; letter-spacing:-0.01em;
+}
+.login-btn:hover { background:#166FE5; transform:translateY(-1px); box-shadow:0 4px 16px rgba(24,119,242,0.4); }
+.login-btn:active { transform:translateY(0); }
+.login-btn:disabled { opacity:0.7; cursor:not-allowed; transform:none; }
+.login-footer { text-align:center; margin-top:20px; font-size:12px; color:#8A8D91; }
+
+/* ── User dropdown in nav ── */
+.user-menu-wrap { position:relative; }
+.user-dropdown {
+  position:absolute; top:calc(100% + 10px); right:0;
+  background:white; border:1px solid #E4E6EB;
+  border-radius:10px; min-width:200px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.15);
+  opacity:0; pointer-events:none; transform:translateY(-8px);
+  transition:all 0.18s; z-index:500;
+}
+.user-dropdown.open { opacity:1; pointer-events:all; transform:translateY(0); }
+.user-dropdown-header { padding:14px 16px 10px; border-bottom:1px solid #E4E6EB; }
+.user-dropdown-name { font-size:14px; font-weight:700; color:#050505; }
+.user-dropdown-role { font-size:12px; color:#65676B; margin-top:1px; }
+.user-dropdown-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 16px; font-size:14px; font-weight:500; color:#050505;
+  cursor:pointer; transition:background 0.12s;
+}
+.user-dropdown-item:hover { background:#F0F2F5; }
+.user-dropdown-item:last-child { border-top:1px solid #E4E6EB; color:#FA3E3E; border-radius:0 0 10px 10px; }
+.user-dropdown-item:last-child:hover { background:#FEECEC; }
+.user-dropdown-item svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+/* dashboard hidden until logged in */
+.dashboard-root { display:none; }
+.dashboard-root.visible { display:block; }
 </style>
 </head>
 <body>
 
-<header class="topnav">
+<!-- ── LOGIN SCREEN ── -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h7"/><circle cx="19" cy="17" r="3"/></svg>
+      </div>
+      <span class="login-logo-text">DataOrg</span>
+    </div>
+    <div class="login-welcome">
+      <h2>Welcome back</h2>
+      <p>Sign in to your Data Organizer Dashboard</p>
+    </div>
+    <div class="login-error" id="login-error">Incorrect username or password. Try again.</div>
+    <div class="login-field">
+      <label>Username</label>
+      <input class="login-input" type="text" id="login-user" placeholder="Enter your username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <div class="login-pw-wrap">
+        <input class="login-input" type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="pw-toggle" onclick="togglePw()" type="button" title="Show/hide password">
+          <svg id="pw-eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-footer">Data Organizer &middot; Protected Dashboard</div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div class="dashboard-root" id="dashboard-root">
   <a class="nav-logo" href="#">
     <div class="nav-logo-icon">
       <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h7"/><circle cx="19" cy="17" r="3"/></svg>
@@ -302,7 +419,27 @@ tbody tr:hover .row-acts { opacity:1; }
     <button class="nav-icon-btn" onclick="showToast('No new notifications')">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </button>
-    <div class="nav-avatar">U</div>
+    <div class="user-menu-wrap">
+      <div class="nav-avatar" onclick="toggleUserMenu()" title="Account menu" id="nav-avatar-btn">A</div>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="user-dropdown-header">
+          <div class="user-dropdown-name" id="dd-username">admin</div>
+          <div class="user-dropdown-role">Administrator</div>
+        </div>
+        <div class="user-dropdown-item" onclick="syncNow();toggleUserMenu()">
+          <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Sync Data
+        </div>
+        <div class="user-dropdown-item" onclick="window.open(SHEET_URL,'_blank');toggleUserMenu()">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Open Google Sheets
+        </div>
+        <div class="user-dropdown-item" onclick="doLogout()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -511,7 +648,108 @@ tbody tr:hover .row-acts { opacity:1; }
 
 <div id="toast"></div>
 
+</div><!-- end .dashboard-root -->
+
 <script>
+// ══════════════════════════════════════════════
+//  AUTH — Login / Logout / Session persistence
+// ══════════════════════════════════════════════
+const AUTH_KEY  = 'dataorg_session';
+const VALID_USER = 'admin';
+const VALID_PASS = 'Thinkbig123*';
+
+function checkSession() {
+  const session = localStorage.getItem(AUTH_KEY);
+  if (session === 'authenticated') {
+    showDashboard();
+  }
+  // else login screen stays visible (default)
+}
+
+function showDashboard() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('dashboard-root').classList.add('visible');
+  loadEntries(); // load data only after auth
+}
+
+function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn   = document.getElementById('login-btn');
+
+  errEl.classList.remove('show');
+  document.getElementById('login-user').classList.remove('error');
+  document.getElementById('login-pass').classList.remove('error');
+
+  if (!user || !pass) {
+    errEl.textContent = 'Please enter both username and password.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  // Small delay for UX feel
+  setTimeout(() => {
+    if (user === VALID_USER && pass === VALID_PASS) {
+      localStorage.setItem(AUTH_KEY, 'authenticated');
+      showDashboard();
+    } else {
+      errEl.textContent = 'Incorrect username or password. Try again.';
+      errEl.classList.add('show');
+      document.getElementById('login-user').classList.add('error');
+      document.getElementById('login-pass').classList.add('error');
+      document.getElementById('login-pass').value = '';
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  }, 600);
+}
+
+function doLogout() {
+  localStorage.removeItem(AUTH_KEY);
+  toggleUserMenu();
+  document.getElementById('dashboard-root').classList.remove('visible');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  document.getElementById('login-user').classList.remove('error');
+  document.getElementById('login-pass').classList.remove('error');
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').textContent = 'Sign In';
+  entries = [];
+  showToast('You have been signed out.');
+}
+
+function togglePw() {
+  const inp = document.getElementById('login-pass');
+  const ico = document.getElementById('pw-eye-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ico.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type = 'password';
+    ico.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+function toggleUserMenu() {
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+// Close dropdown when clicking outside
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.user-menu-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('user-dropdown').classList.remove('open');
+  }
+});
+
+// ── Run session check on page load ──
+checkSession();
+
 // ═══════════════════════════════════════════════════════════
 //  ⚙️  CONFIGURATION — paste your Apps Script URL below
 // ═══════════════════════════════════════════════════════════
@@ -534,23 +772,7 @@ const sCls  = s => ({Active:'active',Draft:'draft',Archived:'archived',Review:'r
 const tCls  = t => (t||'other').toLowerCase();
 const fExt  = f => f ? f.split('.').pop().toLowerCase() : null;
 const fIco  = f => { const e=fExt(f); if(!e)return'file'; if(e==='pdf')return'pdf'; if(['docx','doc'].includes(e))return'doc'; if(['png','jpg','jpeg','gif','zip'].includes(e))return'img'; if(['xlsx','xls','csv'].includes(e))return'xls'; return'file'; };
-const fmtDate = d => {
-  if (!d || d === 'undefined' || String(d).trim() === '') return '—';
-  const s = String(d).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-    const [y, m, day] = s.split('-');
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return `${months[parseInt(m,10)-1]} ${parseInt(day,10)}, ${y}`;
-  }
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
-    const parts = s.split('/');
-    const dt = new Date(`${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`);
-    if (!isNaN(dt)) return dt.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
-  }
-  const dt = new Date(s);
-  if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
-  return '—';
-};
+const fmtDate = d => { if(!d)return'—'; const[y,m,day]=String(d).split('-'); const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return`${months[parseInt(m,10)-1]} ${parseInt(day,10)}, ${y}`; };
 const todayISO = () => new Date().toISOString().split('T')[0];
 const timeAgo  = () => new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 
@@ -569,7 +791,7 @@ function jsonp(params) {
     const script = document.createElement('script');
     const timer = setTimeout(() => {
       cleanup();
-      reject(new Error('Timed out — Apps Script may not be deployed yet'));
+      reject(new Error('Request timed out'));
     }, 15000);
     function cleanup() {
       clearTimeout(timer);
@@ -581,10 +803,7 @@ function jsonp(params) {
       if (data && data.error) reject(new Error(data.error));
       else resolve(data);
     };
-    script.onerror = () => {
-      cleanup();
-      reject(new Error('Cannot reach Apps Script — redeploy with new version in Apps Script editor'));
-    };
+    script.onerror = () => { cleanup(); reject(new Error('Network error — check your Apps Script URL')); };
     script.src = API_URL + '?' + qs;
     document.head.appendChild(script);
   });
@@ -593,13 +812,14 @@ function jsonp(params) {
 // ── API call to Apps Script (GET with JSONP) ──
 async function api(action, body = {}) {
   try {
+    // Encode body params as URL params (Apps Script reads e.parameter)
     const params = { action };
     Object.keys(body).forEach(k => { if (body[k] !== undefined) params[k] = body[k]; });
     const result = await jsonp(params);
     return result;
   } catch (err) {
     showToast('❌ ' + err.message);
-    console.error('Apps Script error:', err.message);
+    console.error(err);
     return null;
   }
 }
@@ -607,26 +827,21 @@ async function api(action, body = {}) {
 // ── Load entries from Google Sheets ──
 async function loadEntries() {
   setLoading(true);
-  document.getElementById('page-sub').textContent = 'Connecting to Google Sheets…';
   const result = await api('getEntries');
   setLoading(false);
   if (result && result.entries) {
     entries = result.entries.map(e => ({
-      id:      e.id      || '',
-      date:    e.date    || '',
-      title:   e.title   || '',
-      desc:    e.desc    || '',
-      type:    e.type    || 'Other',
-      status:  e.status  || 'Draft',
-      notes:   e.notes   || '',
-      file:    e.file    || '',
-      fileurl: e.fileurl || '',
+      id:     e.id     || '',
+      date:   e.date   || '',
+      title:  e.title  || '',
+      desc:   e.desc   || '',
+      type:   e.type   || 'Other',
+      status: e.status || 'Draft',
+      notes:  e.notes  || '',
+      file:   e.file   || '',
     }));
-    addAct('✅ Loaded from Google Sheets', 'green');
-    showToast('✅ Connected to Google Sheets!');
+    addAct('Data loaded from Google Sheets', 'green');
     renderEntries();
-  } else {
-    document.getElementById('page-sub').textContent = '⚠️ Not connected — check Apps Script deployment';
   }
 }
 
@@ -657,8 +872,7 @@ function renderEntries() {
              ${fileLabel}
            </a>`
         : '<span class="no-file">—</span>';
-      const formatted = fmtDate(e.date);
-      const dateCell = formatted !== '—' ? `<div class="entry-date-day">${formatted}</div>` : '<span class="no-file">—</span>';
+      const dateCell = e.date ? `<div class="entry-date-day">${fmtDate(e.date)}</div>` : '<span class="no-file">—</span>';
       return `<tr onclick="viewDetail('${e.id}')">
         <td><span class="entry-id">${e.id}</span></td>
         <td>${dateCell}</td>
@@ -901,8 +1115,7 @@ document.getElementById('del-modal').addEventListener('click', function(e) { if(
 document.addEventListener('keydown', e => { if(e.key==='Escape') { closeDetail(); closeModal(); } });
 document.getElementById('f-date').value = todayISO();
 
-// ── Boot: load from Google Sheets ──
-loadEntries();
+// ── Boot: session check handles loadEntries after auth ──
 </script>
 </body>
 </html>
