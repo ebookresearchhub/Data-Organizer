@@ -773,7 +773,7 @@ const sCls  = s => ({Active:'active',Draft:'draft',Archived:'archived',Review:'r
 const tCls  = t => (t||'other').toLowerCase();
 const fExt  = f => f ? f.split('.').pop().toLowerCase() : null;
 const fIco  = f => { const e=fExt(f); if(!e)return'file'; if(e==='pdf')return'pdf'; if(['docx','doc'].includes(e))return'doc'; if(['png','jpg','jpeg','gif','zip'].includes(e))return'img'; if(['xlsx','xls','csv'].includes(e))return'xls'; return'file'; };
-const fmtDate = d => { if(!d)return'—'; const s=String(d).trim(); const iso=s.match(/(\d{4})-(\d{2})-(\d{2})/); if(iso){const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${months[parseInt(iso[2],10)-1]} ${parseInt(iso[3],10)}, ${iso[1]}`;} return s; };
+const fmtDate = d => { if(!d)return'—'; const s=String(d).trim(); const iso=s.match(/(\d{4})-(\d{2})-(\d{2})/); if(iso){const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${months[parseInt(iso[2],10)-1]} ${parseInt(iso[3],10)}, ${iso[1]}`;} const dt=new Date(s); if(!isNaN(dt)){const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${months[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`;} return s; };
 const todayISO = () => new Date().toISOString().split('T')[0];
 const timeAgo  = () => new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 
@@ -825,6 +825,16 @@ async function api(action, body = {}) {
   }
 }
 
+// ── Normalize any date string to YYYY-MM-DD ──
+function toISODate(d) {
+  if (!d) return '';
+  const s = String(d).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const dt = new Date(s);
+  if (!isNaN(dt)) return dt.toISOString().split('T')[0];
+  return '';
+}
+
 // ── Load entries from Google Sheets ──
 async function loadEntries() {
   setLoading(true);
@@ -833,7 +843,7 @@ async function loadEntries() {
   if (result && result.entries) {
     entries = result.entries.map(e => ({
       id:     e.id     || '',
-      date:   e.date   || '',
+      date:   toISODate(e.date),
       title:  e.title  || '',
       desc:   e.desc   || '',
       type:   e.type   || 'Other',
