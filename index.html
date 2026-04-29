@@ -534,7 +534,23 @@ const sCls  = s => ({Active:'active',Draft:'draft',Archived:'archived',Review:'r
 const tCls  = t => (t||'other').toLowerCase();
 const fExt  = f => f ? f.split('.').pop().toLowerCase() : null;
 const fIco  = f => { const e=fExt(f); if(!e)return'file'; if(e==='pdf')return'pdf'; if(['docx','doc'].includes(e))return'doc'; if(['png','jpg','jpeg','gif','zip'].includes(e))return'img'; if(['xlsx','xls','csv'].includes(e))return'xls'; return'file'; };
-const fmtDate = d => { if(!d)return'—'; const[y,m,day]=String(d).split('-'); const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return`${months[parseInt(m,10)-1]} ${parseInt(day,10)}, ${y}`; };
+const fmtDate = d => {
+  if (!d || d === 'undefined' || String(d).trim() === '') return '—';
+  const s = String(d).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const [y, m, day] = s.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[parseInt(m,10)-1]} ${parseInt(day,10)}, ${y}`;
+  }
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    const parts = s.split('/');
+    const dt = new Date(`${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`);
+    if (!isNaN(dt)) return dt.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+  }
+  const dt = new Date(s);
+  if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+  return '—';
+};
 const todayISO = () => new Date().toISOString().split('T')[0];
 const timeAgo  = () => new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 
@@ -553,7 +569,7 @@ function jsonp(params) {
     const script = document.createElement('script');
     const timer = setTimeout(() => {
       cleanup();
-      reject(new Error('Request timed out'));
+      reject(new Error('Timed out — Apps Script may not be deployed yet'));
     }, 15000);
     function cleanup() {
       clearTimeout(timer);
@@ -565,7 +581,10 @@ function jsonp(params) {
       if (data && data.error) reject(new Error(data.error));
       else resolve(data);
     };
-    script.onerror = () => { cleanup(); reject(new Error('Network error — check your Apps Script URL')); };
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('Cannot reach Apps Script — redeploy with new version in Apps Script editor'));
+    };
     script.src = API_URL + '?' + qs;
     document.head.appendChild(script);
   });
@@ -574,14 +593,13 @@ function jsonp(params) {
 // ── API call to Apps Script (GET with JSONP) ──
 async function api(action, body = {}) {
   try {
-    // Encode body params as URL params (Apps Script reads e.parameter)
     const params = { action };
     Object.keys(body).forEach(k => { if (body[k] !== undefined) params[k] = body[k]; });
     const result = await jsonp(params);
     return result;
   } catch (err) {
     showToast('❌ ' + err.message);
-    console.error(err);
+    console.error('Apps Script error:', err.message);
     return null;
   }
 }
@@ -589,21 +607,26 @@ async function api(action, body = {}) {
 // ── Load entries from Google Sheets ──
 async function loadEntries() {
   setLoading(true);
+  document.getElementById('page-sub').textContent = 'Connecting to Google Sheets…';
   const result = await api('getEntries');
   setLoading(false);
   if (result && result.entries) {
     entries = result.entries.map(e => ({
-      id:     e.id     || '',
-      date:   e.date   || '',
-      title:  e.title  || '',
-      desc:   e.desc   || '',
-      type:   e.type   || 'Other',
-      status: e.status || 'Draft',
-      notes:  e.notes  || '',
-      file:   e.file   || '',
+      id:      e.id      || '',
+      date:    e.date    || '',
+      title:   e.title   || '',
+      desc:    e.desc    || '',
+      type:    e.type    || 'Other',
+      status:  e.status  || 'Draft',
+      notes:   e.notes   || '',
+      file:    e.file    || '',
+      fileurl: e.fileurl || '',
     }));
-    addAct('Data loaded from Google Sheets', 'green');
+    addAct('✅ Loaded from Google Sheets', 'green');
+    showToast('✅ Connected to Google Sheets!');
     renderEntries();
+  } else {
+    document.getElementById('page-sub').textContent = '⚠️ Not connected — check Apps Script deployment';
   }
 }
 
@@ -634,7 +657,8 @@ function renderEntries() {
              ${fileLabel}
            </a>`
         : '<span class="no-file">—</span>';
-      const dateCell = e.date ? `<div class="entry-date-day">${fmtDate(e.date)}</div>` : '<span class="no-file">—</span>';
+      const formatted = fmtDate(e.date);
+      const dateCell = formatted !== '—' ? `<div class="entry-date-day">${formatted}</div>` : '<span class="no-file">—</span>';
       return `<tr onclick="viewDetail('${e.id}')">
         <td><span class="entry-id">${e.id}</span></td>
         <td>${dateCell}</td>
